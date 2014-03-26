@@ -1,0 +1,29 @@
+# create the fastcgi endpoint
+####
+fastcgi.server += (
+  "/myapp.fcgi" => (
+    "main" => (
+      "socket" => "/var/tmp/myapp.sock",
+      "check-local" => "disable",
+      "bin-path" => "/var/www/django/start_django_fastcgi",
+
+      # Set these values as appropriate for your app
+      ####
+      "bin-environment" => (
+        "PATH" => "/bin:/usr/bin:/usr/local/bin",
+        "DJANGO_SOCKET" => "/var/tmp/myapp.sock",
+        "DJANGO_SITEDIR" => "/var/www/django/myapp",
+        "PIDFILE" => "/var/run/myapp.pid"
+      ),
+    )
+  ),
+)
+
+alias.url += (
+  "/myapp-static" => "/var/www/django/myapp/static",
+)
+
+url.rewrite-once += (
+  "^(/myapp-static.*)$" => "$1",      # ensure statics pass through
+  "^(/myapp/.*)$" => "/myapp.fcgi$1"  # pass myapp namespace to fastcgi instance
+)
