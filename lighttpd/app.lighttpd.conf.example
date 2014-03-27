@@ -1,0 +1,21 @@
+# create the fastcgi endpoint
+####
+fastcgi.server += (
+  "/myapp.fcgi" => (
+    "main" => (
+      "host" => env.MYAPP_PORT_9123_TCP_ADDR,
+      "port" => env.MYAPP_PORT_9123_TCP_PORT,
+      "check-local" => "disable"
+    )
+  ),
+)
+
+alias.url += (
+  # this needs to be a shared folder
+  "/myapp-static" => "/var/www/django/myapp-static",
+)
+
+url.rewrite-once += (
+  "^(/myapp-static.*)$" => "$1",      # ensure statics pass through
+  "^(/myapp/.*)$" => "/myapp.fcgi$1"  # pass myapp namespace to fastcgi instance
+)
